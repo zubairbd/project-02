@@ -1,6 +1,6 @@
 @extends('layouts.backend-master')
 
-@section('content')
+@section('backend-content')
 <div class="content">
     <!-- Animated -->
     <div class="animated fadeIn">

@@ -16,6 +16,10 @@ class AdminController extends Controller
     {
         return view('backend.pages.dashboard.index');
     }
+    public function page()
+    {
+        return view('backend.pages.dashboard.page');
+    }
 
     /**
      * Show the form for creating a new resource.

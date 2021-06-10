@@ -1,7 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Backend\RolesController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,9 +18,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/hello', function () {
-    return "hello";
-});
+
+
 
 Auth::routes();
 
@@ -27,8 +27,9 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 
 
-// Route::prefix('admin')->group(function () {
-//     Route::get('/dashbaord', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('home');
-//     // Route::resource('roles', [App\Http\Controllers\Backend\RolesController::class]);
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard2', [App\Http\Controllers\Admin\AdminController::class, 'page'])->name('page');
+    Route::resource('roles', 'App\Http\Controllers\Backend\RolesController', ['name' => 'admin.roles']);
 
-// });
+});

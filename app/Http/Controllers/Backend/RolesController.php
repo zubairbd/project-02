@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -28,7 +30,9 @@ class RolesController extends Controller
      */
     public function create()
     {
-        
+        $permissions = Permission::all();
+        $permission_groups = User::getpermissionGroups();
+        return view('backend.pages.roles.create', compact('permissions', 'permission_groups'));
     }
 
     /**
@@ -39,7 +43,26 @@ class RolesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|unique:roles|max:50',
+        ],
+        [
+            'name.required' => 'Please give a role name',
+        ]
+    );
+
+
+
+        $role = Role::create(['name' => $request->name]);
+
+        // $role = DB::table('roles')->where('name', $request->name)->first();
+        $permissions = $request->input('permissions');
+
+        if(!empty($permissions)){
+            $role->syncPermissions($permissions);
+        }
+
+        return back();
     }
 
     /**
