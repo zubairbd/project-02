@@ -2503,3 +2503,8 @@ footer.site-footer {
     right: 20px !important; }
 
 /*# sourceMappingURL=style.css.map */
+
+
+.current a {
+	color: #03a9f3 !important;
+}

@@ -1,7 +1,7 @@
 <header id="header" class="header">
     <div class="top-left">
         <div class="navbar-header">
-            <a class="navbar-brand" href="{{url('/admin/dashboard')}}"><img src="{{asset('backend')}}/images/tanmisit-green.png" alt="Logo"></a>
+            <a class="navbar-brand" href="{{route('admin.dashboard')}}"><img src="{{asset('backend')}}/images/tanmisit-green.png" alt="Logo"></a>
             <a class="navbar-brand hidden" href="{{url('/admin/dashboard')}}"><img src="{{asset('backend')}}/images/logo2.png" alt="Logo"></a>
             <a id="menuToggle" class="menutoggle"><i class="fa fa-bars"></i></a>
         </div>
@@ -93,9 +93,16 @@
                     <a class="nav-link" href="#"><i class="fa fa- user"></i>Notifications <span class="count">13</span></a>
 
                     <a class="nav-link" href="#"><i class="fa fa -cog"></i>Settings</a>
+                    <a class="nav-link" href="#"><i class="fa fa -cog"></i>{{Auth::guard('admin')->user()->name}}</a>
 
-                    <a class="nav-link" href="#"><i class="fa fa-power -off"></i>Logout</a>
-                </div>
+                    <a class="nav-link" href="{{ route('admin.logout.submit') }}"
+                    onclick="event.preventDefault();
+                                  document.getElementById('logout-form').submit();"><i class="fa fa-power -off"></i>Logout</a>
+                <form id="logout-form" action="{{ route('admin.logout.submit') }}" method="POST" class="d-none">
+                    @csrf
+                </form>
+            </div>
+                
             </div>
 
         </div>

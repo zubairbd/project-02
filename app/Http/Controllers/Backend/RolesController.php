@@ -5,13 +5,25 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 
 class RolesController extends Controller
 {
+    public $user;
+
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $this->user = Auth::guard('admin')->user();
+            return $next($request);
+        });
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -19,6 +31,9 @@ class RolesController extends Controller
      */
     public function index()
     {
+        if (is_null($this->user) || !$this->user->can('role.view')) {
+            abort(403, 'Sorry !! You are Unauthorized to view any role !');
+        }       
         $roles = Role::all();
         return view('backend.pages.roles.index', compact('roles'));
     }
@@ -30,9 +45,12 @@ class RolesController extends Controller
      */
     public function create()
     {
-        $permissions = Permission::all();
+        if(is_null($this->user) || !$this->user->can('role.create')){
+            abort(403, 'Unauthorized Access');
+        }
+        $all_permissions = Permission::all();
         $permission_groups = User::getpermissionGroups();
-        return view('backend.pages.roles.create', compact('permissions', 'permission_groups'));
+        return view('backend.pages.roles.create', compact('all_permissions', 'permission_groups'));
     }
 
     /**
@@ -43,6 +61,9 @@ class RolesController extends Controller
      */
     public function store(Request $request)
     {
+        if(is_null($this->user) || !$this->user->can('role.create')){
+            abort(403, 'Unauthorized Access');
+        }
         $request->validate([
             'name' => 'required|unique:roles|max:50',
         ],
@@ -51,9 +72,7 @@ class RolesController extends Controller
         ]
     );
 
-
-
-        $role = Role::create(['name' => $request->name]);
+        $role = Role::create(['name' => $request->name, 'guard_name' => 'admin']);
 
         // $role = DB::table('roles')->where('name', $request->name)->first();
         $permissions = $request->input('permissions');
@@ -62,7 +81,7 @@ class RolesController extends Controller
             $role->syncPermissions($permissions);
         }
 
-        return back();
+        return redirect()->back()->with('success','Role has been Created!');
     }
 
     /**
@@ -84,7 +103,13 @@ class RolesController extends Controller
      */
     public function edit($id)
     {
-        //
+        if(is_null($this->user) || !$this->user->can('role.edit')){
+            abort(403, 'Unauthorized Access');
+        }
+        $role = Role::findById($id , 'admin');
+        $all_permissions = Permission::all();
+        $permission_groups = User::getpermissionGroups();
+        return view('backend.pages.roles.edit', compact('role','all_permissions', 'permission_groups'));
     }
 
     /**
@@ -96,7 +121,25 @@ class RolesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        if(is_null($this->user) || !$this->user->can('role.edit')){
+            abort(403, 'Unauthorized Access');
+        }
+        $request->validate([
+            'name' => 'required|max:50|unique:roles,name,'. $id
+        ],
+        [
+            'name.required' => 'Please give a role name',
+        ]
+    );
+
+        $role = Role::findById($id, 'admin');
+        $permissions = $request->input('permissions');
+
+        if(!empty($permissions)){
+            $role->syncPermissions($permissions);
+        }
+
+        return redirect()->back()->with('success','Role has been updated!');
     }
 
     /**
@@ -107,6 +150,13 @@ class RolesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if(is_null($this->user) || !$this->user->can('role.delete')){
+            abort(403, 'Unauthorized Access');
+        }
+        $role = Role::findById($id, 'admin');
+        if(!is_null($role)){
+            $role->delete();
+        }
+        return redirect()->back()->with('error', 'Deleted Role');
     }
 }
